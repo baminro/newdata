@@ -1,0 +1,763 @@
+Appendix A: MATLAB codes.
+clear   % CLEARING DATA
+close all
+ 
+data=readtable('datapaper.xlsx','Sheet','Sheet1');
+data1=timetable(data.date, data.exchange);
+data1.retex=zeros(size(data1));
+data1.retex(2:end,:)=(data1.Var1(2:end,:)./data1.Var1(1:end-1,:))-1;
+data2=rmmissing(timetable(data.date1, (data.price)));
+data2.retprice=zeros(size(data2));
+data2.retprice(2:end,:)=(data2.Var1(2:end,:)./data2.Var1(1:end-1,:))-1;
+ 
+ 
+data3=rmmissing(synchronize(data1, data2));
+data3.pricerials=data3.Var1_data1.*data3.Var1_data2;
+data3.retpricerials=zeros(size(data3.pricerials));
+data3.retpricerials(2:end,:)=(data3.pricerials(2:end,:)./data3.pricerials(1:end-1,:))-1;
+ 
+forcop=readtable('foroil.xlsx','Sheet','Sheet1');
+forexch=readtable('forUSA_NOK.xlsx','Sheet','Sheet1');
+ 
+totalmeanex=mean(data1.retex)*252;
+totalstdex=std(data1.retex)*sqrt(252);
+data11=data1(data1.retex<totalmeanex/252,:);
+totalsemistdex=std(data11.retex)*sqrt(252);
+totalmeanprice=mean(data2.retprice)*252;
+totalstdprice=std(data2.retprice)*sqrt(252);
+data22=data2(data2.retprice<totalmeanprice/252,:);
+totalsemistdprice=std(data22.retprice)*sqrt(252);
+totalmeanpricerials=mean(data3.retpricerials)*252;
+totalstdpricerials=std(data3.retpricerials)*sqrt(252);
+data33=data3(data3.retpricerials<totalmeanpricerials/252,:);
+totalsemistdpricerials=std(data33.retpricerials)*sqrt(252);
+totalcorrcoefprex=corr(data3.retex,data3.retprice);
+data1122=rmmissing(synchronize(data11, data22));
+totalsemicorrcoefprex=corr(data1122.retex,data1122.retprice);
+[row, column]=size(groupcounts(year(data1.Time)));
+%meanretexyearly=zeros(row,2);
+stdretexyearly=zeros(row-16,2);
+semistdretexyearly=zeros(row-16,2);
+[row1, ~]=size(groupcounts(year(data2.Time)));
+%meanretpriyearly=zeros(row1,2);
+stdretpriyearly=zeros(row1,2);
+semistdretpriyearly=zeros(row1,2);
+[row1, column2]=size(groupcounts(year(data3.Time)));
+%meanretpririalsyearly=zeros(row1,2);
+stdretpririalsyearly=zeros(row1,2);
+semistdretpririalsyearly=zeros(row1,2);
+[row1, column1]=size(groupcounts(year(data3.Time)));
+ccretpririalsyearly=zeros(row1,2);
+semiccretpririalsyearly=zeros(row1,2);
+ 
+ 
+ 
+data1.retexj=zeros(size(data1.Time));
+data1.retexjj=zeros(size(data1.Time));
+sdf=size(data1.Time);
+for j=1:sdf(1)-1
+      if abs(data1.retex(j+1))>mean(data1.retex)+2*std(data1.retex)
+          data1.retexj(j+1)=1;
+          data1.retexjj(j+1)=abs(data1.retex(j+1))-(mean(data1.retex)+2*std(data1.retex));
+      end
+      
+      
+end
+data1.retexj(data1.retexj==0) = NaN;
+data1.retexjj(data1.retexjj==0) = NaN;
+jumpE=size(rmmissing(data1.retexj))/12;
+jumpE=round(jumpE(1));
+meanjumpE=mean(rmmissing(data1.retexjj));
+stdjumpE=std(rmmissing(data1.retexjj));
+ 
+ 
+data2.retpricej=zeros(size(data2.Time));
+data2.retpricejj=zeros(size(data2.Time));
+sdf1=size(data2.Time);
+for jj=1:sdf1(1)-1
+      if abs(data2.retprice(jj+1))>mean(data2.retprice)+2*std(data2.retprice)
+          data2.retpricej(jj+1)=1;
+          data2.retpricejj(jj+1)=abs(data2.retprice(jj+1))-(mean(data2.retprice)+2*std(data2.retprice));
+      end
+      
+      
+end
+data2.retpricej(data2.retpricej==0) = NaN;
+data2.retpricejj(data2.retpricejj==0) = NaN;
+jumpP=size(rmmissing(data2.retpricej))/12;
+jumpP=round(jumpP(1));
+meanjumpP=mean(rmmissing(data2.retpricejj));
+stdjumpP=std(rmmissing(data2.retpricejj));
+ 
+for i=1987:1:2025
+       a=mean(data1(year(data1.Time)==i,'retex').retex)*252;
+       %meanretexyearly(i-2012,1)=i;
+       %meanretexyearly(i-2012,2)=a;
+       b=std(data1(year(data1.Time)==i,'retex').retex)*sqrt(252);
+       stdretexyearly(i-1986,1)=i;
+       stdretexyearly(i-1986,2)=b;
+     
+       data11=data1(data1.retex<a/252,:);
+       c=std(data11(year(data11.Time)==i,'retex').retex)*sqrt(252);
+       semistdretexyearly(i-1986,1)=i;
+       semistdretexyearly(i-1986,2)=c;
+       
+       aa=mean(data2(year(data2.Time)==i,'retprice').retprice)*252;
+       %meanretpriyearly(i-2012,1)=i;
+       %meanretpriyearly(i-2012,2)=a;
+       bb=std(data2(year(data2.Time)==i,'retprice').retprice)*sqrt(252);
+       stdretpriyearly(i-1986,1)=i;
+       stdretpriyearly(i-1986,2)=bb;
+       data22=data2(data2.retprice<aa/252,:);
+       cc=std(data22(year(data22.Time)==i,'retprice').retprice)*sqrt(252);
+       semistdretpriyearly(i-1986,1)=i;
+       semistdretpriyearly(i-1986,2)=cc;
+       
+       aaa=mean(data3(year(data3.Time)==i,'retpricerials').retpricerials)*252;
+       %meanretpririalsyearly(i-2012,1)=i;
+       %meanretpririalsyearly(i-2012,2)=a;
+       bbb=std(data3(year(data3.Time)==i,'retpricerials').retpricerials)*sqrt(252);
+       stdretpririalsyearly(i-1986,1)=i;
+       stdretpririalsyearly(i-1986,2)=bbb;
+       data33=data3(data3.retpricerials<aaa/252,:);
+       ccc=std(data33(year(data33.Time)==i,'retpricerials').retpricerials)*sqrt(252);
+       semistdretpririalsyearly(i-1986,1)=i;
+       semistdretpririalsyearly(i-1986,2)=ccc;
+       
+       bbbb=corr(data3(year(data3.Time)==i,'retex').retex,data3(year(data3.Time)==i,'retprice').retprice);
+       ccretpririalsyearly(i-1986,1)=i;
+       ccretpririalsyearly(i-1986,2)=bbbb;
+       cccc=corr(data1122(year(data1122.Time)==i,'retex').retex,data1122(year(data1122.Time)==i,'retprice').retprice);
+       semiccretpririalsyearly(i-1986,1)=i;
+       semiccretpririalsyearly(i-1986,2)=cccc;
+ 
+end
+maxstdretexyearly=stdretexyearly(stdretexyearly(:,2)==max(stdretexyearly(:,2)),:);
+minstdretexyearly=stdretexyearly(stdretexyearly(:,2)==min(stdretexyearly(:,2)),:);
+meanstdretexyearly=mean(stdretexyearly(:,2));
+maxseminstdretexyearly=semistdretexyearly(semistdretexyearly(:,2)==max(semistdretexyearly(:,2)),:);
+minsemistdretexyearly=semistdretexyearly(semistdretexyearly(:,2)==min(semistdretexyearly(:,2)),:);
+meansemistdretexyearly=mean(semistdretexyearly(:,2));
+maxstdretpriyearly=stdretpriyearly(stdretpriyearly(:,2)==max(stdretpriyearly(:,2)),:);
+minstdretpriyearly=stdretpriyearly(stdretpriyearly(:,2)==min(stdretpriyearly(:,2)),:);
+meanstdretpriyearly=mean(stdretpriyearly(:,2));
+maxsemistdretpriyearly=semistdretpriyearly(semistdretpriyearly(:,2)==max(semistdretpriyearly(:,2)),:);
+minsemistdretpriyearly=semistdretpriyearly(semistdretpriyearly(:,2)==min(semistdretpriyearly(:,2)),:);
+meansemistdretpriyearly=mean(semistdretpriyearly(:,2));
+maxstdretpririalsyearly=stdretpririalsyearly(stdretpririalsyearly(:,2)==max(stdretpririalsyearly(:,2)),:);
+minstdretpririalsyearly=stdretpririalsyearly(stdretpririalsyearly(:,2)==min(stdretpririalsyearly(:,2)),:);
+meanstdretpririalsyearly=mean(stdretpririalsyearly(:,2));
+maxsemistdretpririalsyearly=semistdretpririalsyearly(semistdretpririalsyearly(:,2)==max(semistdretpririalsyearly(:,2)),:);
+minsemistdretpririalsyearly=semistdretpririalsyearly(semistdretpririalsyearly(:,2)==min(semistdretpririalsyearly(:,2)),:);
+meansemistdretpririalsyearly=mean(semistdretpririalsyearly(:,2));
+maxccretpririalsyearly=ccretpririalsyearly(ccretpririalsyearly(:,2)==max(ccretpririalsyearly(:,2)),:);
+minccretpririalsyearly=ccretpririalsyearly(ccretpririalsyearly(:,2)==min(ccretpririalsyearly(:,2)),:);
+meanccretpririalsyearly=mean(ccretpririalsyearly(:,2));
+maxsemiccretpririalsyearly=semiccretpririalsyearly(semiccretpririalsyearly(:,2)==max(semiccretpririalsyearly(:,2)),:);
+minsemiccretpririalsyearly=semiccretpririalsyearly(semiccretpririalsyearly(:,2)==min(semiccretpririalsyearly(:,2)),:);
+meansemiccretpririalsyearly=mean(semiccretpririalsyearly(:,2));
+ 
+ 
+% *** SIMULATION VARIABLES ***
+ 
+% START AND END DATE OF PREDICTION PERIOD.
+StartDate = datetime(2025,07,11);
+EndDate = datetime(2026,07,12);
+% BUSINESS DAYS IN THE PERIOD. 
+BusinessDays = busdays(StartDate, EndDate);
+% NUMBER OF BUSINESS DAYS
+temp = size(BusinessDays);
+% nPeriods: GBM VARIABLE.
+nPeriods = temp(1)-1;
+% TIME STEP.
+dt = 1/nPeriods;
+% NUMBER OF SIMULATIONS.
+Trials = 1000;
+ 
+ 
+ 
+ 
+ 
+% *** Equation Variables ***
+ 
+Rus = 0.045;  % INTEREST RATE IN US.
+             % SOURCE: www.kroll.com
+Rir = 0.0425; % RISK FREE INTEREST RATE IN Norway.
+            % SOURCE: OFFICIAL DATA.
+t=1/12;
+Fff=68.94;
+Ppp=69.01;
+delta =Rus-(1/t)*(log(Fff/Ppp)); % MEAN CONVINIENCE YIELD ON HOLDING 1 UNIT OF Oil.
+                     % CALCULATED FOR US $
+                     % DELTA = Rus-(1/t)*LN(Pend/P0)
+                     % [Last 3 Months of Data]
+sigmaP =meansemistdretpriyearly; % VOLATILITY OF RETURNS FOR HOLDING 1 UNIT OF Oil.
+                      % STANDARD DIVIATION OF RETURNS.
+                      % [Last 3 Months of Data]
+sigmaE = meansemistdretexyearly; % VOLATILITY OF RETURNS.
+                 % STANDARD DIVIATION OF RETURNS.
+                 % [Last 3 Months of Data]
+P0 = data2.Var1(end); % LAST KNOWN PRICE OF Oil IN THE PERIOD.
+E0 = data1.Var1(end); % LAST KNOWN EXCHANGE RATE. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+% *** SECTION 01: PRICE ANALYSIS ***
+ 
+ 
+% *** SIMULATION FOR PRICE OF Oil IN TERMS OF US $ ***
+ 
+% Price = gbm(Rus-delta, sigmaP, 'StartState',P0);
+% rng('default')
+% [P,Time] = Price.simBySolution(nPeriods, 'DeltaTime', dt,...
+%                 'nTrials', Trials,'Antithetic',false);
+ 
+AssetPrice = P0;
+Return = Rus-delta;
+Sigma = sigmaP;
+JumpMean = meanjumpP;
+JumpVol = stdjumpP;
+JumpFreq = jumpP+5;
+            
+Price= merton(Return,Sigma,JumpFreq,JumpMean,JumpVol,...
+                'startstat',AssetPrice);
+ 
+[P,Time] = Price.simBySolution(nPeriods, 'DeltaTime', dt,...
+                'nTrials', Trials,'Antithetic',false);            
+KP=exp(JumpMean+(0.5*JumpVol^2))-1;
+KPIN=exp(2*JumpMean+(JumpVol^2))*(exp(JumpVol^2)-1);
+varqp=JumpFreq*(KPIN+KP^2);
+            
+% *** PUTTING THE SIMULATION PATH IN MATRIX PriceForecast,
+% FOR BETTER DATA HANDLING ***
+ 
+PriceForecast = zeros(nPeriods+1,Trials);
+for i = 1:Trials
+    PriceForecast(:,i)=P(:,1,i);
+end
+ 
+ 
+% *** PROCESSING FOR MAX, MIN, and MEAN PATHS. ***
+ 
+MaximumPricePath = zeros(nPeriods+1,1);
+MinimumPricePath = zeros(nPeriods+1,1);
+MeanPricePath = zeros(nPeriods+1,1);
+for d = 1:252
+    MaximumPricePath(d,1) = max(PriceForecast(d,:));
+    MinimumPricePath(d,1) = min(PriceForecast(d,:));
+    MeanPricePath(d,1) = mean(PriceForecast(d,:));
+end
+ 
+ 
+ 
+% *** ADDING MAX,MIN,MEAN PATH TO PriceForecast DATA ***
+ 
+PriceForecast(:,Trials+1) = MaximumPricePath();
+PriceForecast(:,Trials+2) = MinimumPricePath();
+PriceForecast(:,Trials+3) = MeanPricePath();
+ 
+ 
+ 
+% *** WRITING THE DATA TO FILE 'PriceForecast.xlsx'. ***
+ 
+filename = 'PriceForecast.xlsx';   
+xlswrite(filename,PriceForecast);
+ 
+ 
+ 
+% *** CALCULATING VOLATILITY OF PRICE FOR MAX,MIN,MEAN PATH ***
+ 
+returnMax = zeros(nPeriods,1);
+returnMin = zeros(nPeriods,1);
+returnMean = zeros(nPeriods,1);
+for i = 1:nPeriods
+    returnMax(i) = (MaximumPricePath(i+1)-MaximumPricePath(i))/MaximumPricePath(i);
+    returnMin(i) = (MinimumPricePath(i+1)-MinimumPricePath(i))/MinimumPricePath(i);
+    returnMean(i) = (MeanPricePath(i+1)-MeanPricePath(i))/MeanPricePath(i);
+end
+volatilityMax = std(returnMax);
+volatilityMin = std(returnMin);
+volatilityMean = std(returnMean);
+ 
+% PLOTTING PATHS.
+ 
+figure(1) % PLOTTING exchange.
+namef1 = {};
+namef1{1} = 'The Exchange';
+hold on
+plot(data1.Time,data1.Var1);
+title('Exchage Price');
+xlabel('Date'); 
+ylabel('Exchange Rate (Norwegian Krone)');
+legend(namef1,'Location', 'Best');
+grid on;
+grid minor;
+ 
+% PLOTTING PATHS.
+ 
+figure(2) % PLOTTING exchange.
+namef1 = {};
+namef1{1} = 'The Oil Price';
+hold on
+plot(data2.Time,data2.Var1);
+title('Oil Price');
+xlabel('Date'); 
+ylabel('Oil Price ($/bbl)');
+legend(namef1,'Location', 'Best');
+grid on;
+grid minor;
+ 
+ 
+ 
+ 
+% PLOTTING SIMULATION PATHS.
+ 
+figure(3) % PLOTTING MAX,MIN,MEAN PATHS.
+namef1 = {};
+plot(BusinessDays,MaximumPricePath);
+namef1{1} = 'The Best Senario';
+hold on
+plot(BusinessDays,MinimumPricePath);
+namef1{2} = 'The Worst Senario';
+plot(BusinessDays,MeanPricePath);
+namef1{3} = 'The Mean Senario';
+title('Forecasting of Oil Price');
+xlabel('Date'); 
+ylabel('Oil Price($/bbl)');
+legend(namef1,'Location', 'Best');
+domain = max(MaximumPricePath) - min(MinimumPricePath);
+ylim([min(MinimumPricePath)-domain/4, max(MaximumPricePath)+domain/4]);
+grid on;
+grid minor;
+ 
+ 
+figure(4) % PLOTTING 5 RANDOM PATHS.
+namef2 = {};
+for i = 1:5
+    j = randsample(Trials,1);
+    plot(BusinessDays,PriceForecast(:,j));
+    namef2{end+1} = ['Simulation-' num2str(j)];
+    hold on;
+end
+title('Forecasting of Oil Price');
+xlabel('Date'); 
+ylabel('Oil Price($/bbl)'); 
+domain = max(MaximumPricePath) - min(MinimumPricePath);
+ylim([min(MinimumPricePath)-domain/4, max(MaximumPricePath)+domain/4]);
+grid on;
+grid minor;
+hold on;
+ 
+ 
+disp('<<< End of Price Analysis Simulation >>>')
+ 
+ 
+ 
+ 
+ 
+% *** SECTION 02: EXCHANGE RATE ANALYSIS ***
+ 
+% *** SIMULATION FOR EXCHANGE RATE FOR US $ AND Norwegian RIAL ***
+% ExchangeRate = gbm(Rir-Rus, sigmaE, 'StartState',E0);
+% rng('default')
+% [E,Time] = ExchangeRate.simBySolution(nPeriods, 'DeltaTime', dt,...
+%                 'nTrials', Trials,'Antithetic',false);
+            
+ 
+AssetPrice1 = E0;
+Return1 =Rir-Rus;
+Sigma1 = sigmaE;
+JumpMean1 = meanjumpE;
+JumpVol1 = stdjumpE;
+JumpFreq1 = jumpE+5;
+            
+ExchangeRate= merton(Return1,Sigma1,JumpFreq1,JumpMean1,JumpVol1,...
+                'startstat',AssetPrice1);
+ 
+[E,Time] = ExchangeRate.simBySolution(nPeriods, 'DeltaTime', dt,...
+                'nTrials', Trials,'Antithetic',false);              
+            
+KE=exp(JumpMean1+(0.5*JumpVol1^2))-1;
+KEIN=exp(2*JumpMean1+(JumpVol1^2))*(exp(JumpVol1^2)-1);
+varqe=JumpFreq1*(KEIN+KE^2);            
+% *** PUTTING THE SIMULATION PATH IN MATRIX ExchForecast,
+% FOR BETTER DATA HANDLING ***
+ 
+ExchForecast = zeros(nPeriods+1,Trials);
+for i = 1:Trials
+    ExchForecast(:,i)=E(:,1,i);
+end
+ 
+ 
+ 
+ 
+% *** PROCESSING FOR MAX, MIN, and MEAN PATHS. ***
+ 
+MaximumExchPath = zeros(nPeriods+1,1);
+MinimumExchPath = zeros(nPeriods+1,1);
+MeanExchPath = zeros(nPeriods+1,1);
+for d = 1:252
+    MaximumExchPath(d,1) = max(ExchForecast(d,:));
+    MinimumExchPath(d,1) = min(ExchForecast(d,:));
+    MeanExchPath(d,1) = mean(ExchForecast(d,:));
+end
+ 
+ 
+ 
+ 
+% *** ADDING MAX,MIN,MEAN PATH TO PriceForecast DATA ***
+ 
+ExchForecast(:,Trials+1) = MaximumExchPath();
+ExchForecast(:,Trials+2) = MinimumExchPath();
+ExchForecast(:,Trials+3) = MeanExchPath();
+ 
+ 
+ 
+% *** WRITING THE DATA TO FILE 'ExchForecast.xlsx'. ***
+ 
+filename = 'ExchForecast.xlsx';   
+xlswrite(filename,ExchForecast);
+ 
+ 
+ 
+ 
+% PLOTTING SIMULATION PATHS.
+ 
+figure(5) % PLOTTING MAX,MIN,MEAN PATHS.
+namef1 = {};
+plot(BusinessDays,MaximumExchPath);
+namef1{1} = 'The Best Senario';
+hold on
+plot(BusinessDays,MinimumExchPath);
+namef1{2} = 'The Worst Senario';
+plot(BusinessDays,MeanExchPath);
+namef1{3} = 'The Mean Senario';
+title('Forecasting of Exchange Path');
+xlabel('Date'); 
+ylabel('Exchange Rate (Norwegian Krone)');
+legend(namef1,'Location', 'Best');
+domain = max(MaximumExchPath) - min(MinimumExchPath);
+ylim([min(MinimumExchPath)-domain/4, max(MaximumExchPath)+domain/4]);
+grid on;
+grid minor;
+ 
+ 
+figure(6) % PLOTTING 5 RANDOM PATHS.
+namef2 = {};
+for i = 1:5
+    j = randsample(Trials,1);
+    plot(BusinessDays,ExchForecast(:,j));
+    namef2{end+1} = ['Simulation-' num2str(j)];
+    hold on;
+end
+title('Forecasting of Exchange Rate');
+xlabel('Date'); 
+ylabel('Exchange Rate (Norwegian Krone)'); 
+domain = max(MaximumExchPath) - min(MinimumExchPath);
+ylim([min(MinimumExchPath)-domain/4, max(MaximumExchPath)+domain/4]);
+grid on;
+grid minor;
+hold on;
+ 
+
+ 
+disp('<<< End of Exchange Rate Simulation >>>')
+ 
+
+ 
+ 
+% *** SECTION 03: PREDICTION OF PROJECT VALUE USING FDM *** 
+ 
+ 
+ 
+% *** PROBLEM VARIABLES ***
+Q = 7.05*1000000*6.2898;   % TOTAL AMOUNT OF RESERVES (ASSUMPTION)
+T = 5;           % NUMBER OF YEARS FOR EXTRACTION (ASSUMPTION)
+q = Q/T;         % EXTRACTION PER YEAR.
+ccPE = totalcorrcoefprex; % CALCULATED CORRELATION COEFICIENT
+                 % [Last 3 Months of Data]
+%Pir = PriceForecast.*ExchForecast; % Oil PRICE IN TERMS OF Norwegian RIAL.
+%Pir = data3.pricerials;
+P=71.95;
+E=10.06;
+Pir = P*E;
+% VOLATILITY OF RETURNS FOR HOLDING 1 UNIT OF Oil 
+% IN TERMS OF Norwegian RIAL.
+sigmaPir = sqrt(sigmaP^2+sigmaE^2+2*ccPE*sigmaP*sigmaE+varqp+varqe); 
+landaC = 0; % COUNTRY RISK PREMIUM. 
+R = 0; % ROYALTY TAX IN Norway. 
+Cprime = 20*E; % TOTAL COST FOR EXTRACTION OF 1 UNIT OF Oil (RIAL)
+G = 0; % CORPORATE TAX IN Norway. 
+ 
+ 
+% *** SIMULATION VARIABLES ***
+ 
+N = 50;   % MESHING SIZE FOR PRICE. 
+J = 5000;   % MESHING SIZE FOR RESERVES.
+Q_data = linspace(Q,0,J+1); % RESERVE DATA SEQUENCE.
+Pir_data = linspace(0,max(max(Pir)),N+1); % PRICE DATA SEQUENCE
+dPir = max(max(Pir))/N; % STEP SIZE FOR Pir
+dQ = Q/J;          % STEP SIZE FOR Q.
+V = zeros(N+1,J+1); % PROJECT VALUE MATRIX. 
+%V(1:N,1)=0;
+ 
+% EXPLICIT FDM
+for j = 1:J
+    V(1,j)=0;
+    for n = 2:N
+        
+        
+        V(n,j+1)= ((0.5*sigmaPir^2*n^2*dQ/q)-...
+                    (n*(Rir-delta)*dQ/(2*q)))*V(n-1,j)+ ...
+                  (1-(sigmaPir^2*n^2*dQ/q)-((Rir+landaC)*dQ/q))*V(n,j)+...
+                  ((0.5*sigmaPir^2*n^2*dQ/q)+...
+                    (n*(Rir-delta)*dQ/(2*q)))*V(n+1,j)+...
+                  (n*dPir(1-R)-Cprime)*(1-G)*dQ;
+        V(n,J+1)=0;
+        
+    end
+end
+ 
+% PLOTING V(Pir,Q)
+figure(7)
+cla
+surf(Q_data,Pir_data,V,gradient(V),'LineStyle','none')
+xlabel('Q') 
+ylabel('P')
+zlabel('V') 
+colorbar
+ 
+filename = 'Exch.xlsx';   
+writetimetable(data1,filename);
+filename = 'oil.xlsx';   
+writetimetable(data2,filename);
+filename = 'combin.xlsx';   
+writetimetable(data3,filename);
+ 
+max(max(V))
+
+
+
+
+
+
+Appendix B: Python codes in CoLab.
+import tensorflow as tf
+physical_devices = tf.config.list_physical_devices('GPU')
+
+print("GPU:", tf.config.list_physical_devices('GPU'))
+print("Num GPUs:", len(physical_devices))
+
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+
+!pip install tensorflow[and-cuda]
+
+
+import pandas as pd
+import numpy as np
+import math
+import matplotlib.pyplot as plt # Visualization
+import matplotlib.dates as mdates # Formatting dates
+import seaborn as sns # Visualization
+from sklearn.preprocessing import MinMaxScaler
+import torch # Library for implementing Deep Neural Network
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+
+
+
+#Diable the warnings
+import warnings
+warnings.filterwarnings('ignore')
+
+
+data=pd.read_excel('/content/drive/MyDrive/USD_NOK.xlsx')
+data=data.set_index('Date')
+data['SMA30Var1'] = data['Price'].rolling(252).mean()
+data['SMA5Var1'] = data['Price'].rolling(100).mean()
+data['SMA5Var1-SMA30Var1']=data['SMA5Var1']-data['SMA30Var1']
+data=data[['Price']].dropna()
+data.dropna(inplace=True)
+data
+
+
+# Normalize the data
+scaler = MinMaxScaler()
+scaled_data = scaler.fit_transform(data)
+# Split the data into train and test sets
+train_size = int(len(scaled_data) * 0.95)
+train_data = scaled_data[:train_size]
+test_data = scaled_data[train_size:]
+
+
+
+def create_sequences(data, seq_length):
+     X, y = [], []
+     for i in range(len(data) - seq_length-252):
+         X.append(data[i:i+seq_length])
+         y.append(data[i+seq_length+1:i+seq_length+252+1])
+     return np.array(X), np.array(y)
+seq_length =252 # Number of time steps to look back
+X_train, y_train = create_sequences(train_data, seq_length)
+X_test, y_test = create_sequences(test_data, seq_length)
+
+
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input,Conv1D, Dense,Add, LayerNormalization, MultiHeadAttention,Dropout, GlobalAveragePooling1D
+from sklearn.metrics import mean_squared_error
+import math
+import matplotlib.pyplot as plt
+import keras
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+
+
+
+# Transformer Block
+def transformer_encoder(inputs, head_size, num_heads, ff_dim,dropout=0, attention_axes=None):
+    x = LayerNormalization(epsilon=0.001)(inputs)
+    x = MultiHeadAttention(
+    key_dim=head_size, num_heads=num_heads, dropout=dropout, attention_axes=attention_axes)(x, x)
+    x = Dropout(dropout)(x)
+    res = x + inputs
+    # Feed Forward Part
+    x = LayerNormalization(epsilon=0.001)(res)
+    x = Conv1D(filters=ff_dim, kernel_size=1, activation="relu")(x)
+    x = Dropout(dropout)(x)
+    x = Conv1D(filters=inputs.shape[-1], kernel_size=1)(x)
+    return x + res
+
+def build_transfromer(head_size,
+         num_heads,
+         ff_dim,
+         num_trans_blocks,
+         mlp_units, dropout=0, mlp_dropout=0) -> tf.keras.Model:
+   n_timesteps, n_features, n_outputs = 252, 1, 1
+   inputs = tf.keras.Input(shape=(n_timesteps, n_features))
+   x = inputs
+   for _ in range(num_trans_blocks):
+          x = transformer_encoder(x, head_size, num_heads, ff_dim, dropout)
+   for dim in mlp_units:
+          x = Dense(dim, activation="relu")(x)
+          x = Dropout(mlp_dropout)(x)
+   x=keras.layers.Reshape((n_timesteps,252))(x)
+   outputs = Dense(1, activation='relu')(x)
+   # tf.keras.layers(outputs,(n_timesteps,1))
+   return tf.keras.Model(inputs, outputs)
+
+transformer = build_transfromer(head_size=75, num_heads=2, ff_dim=2,
+                                num_trans_blocks=2, mlp_units=[252],
+                                mlp_dropout=0.20, dropout=0.20,)
+transformer.summary()
+transformer.compile(
+loss="mse",
+optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+metrics=["mse"],)
+
+filepath = 'tf1_mnist_cnn.weights.h5'
+save_checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1,
+                save_best_only=True, save_weights_only=True,
+                mode='auto', save_freq="epoch",)
+history = transformer.fit(X_train, y_train[:,:,0], batch_size=12,
+               epochs=20, validation_data=(X_test, y_test[:,:,0]),
+               verbose=1,shuffle=True, callbacks=save_checkpoint)
+
+# Make predictions
+transformer.load_weights('tf1_mnist_cnn.weights.h5')
+train_predict = transformer.predict(X_train)
+test_predict = transformer.predict(X_test)
+# Inverse transform predictions
+#train_predict = scaler.inverse_transform(train_predict)
+#test_predict = scaler.inverse_transform(test_predict
+train_mse=mean_squared_error(y_train[:,:,0], train_predict.squeeze())
+test_mse=mean_squared_error(y_test[:,:,0], test_predict.squeeze())
+# Evaluate the model (Optional: Calculate RMSE or other metrics)
+#train_rmse = math.sqrt(mean_squared_error(y_train, scaler.inverse_transform(train_predict.reshape(-1, 1))))
+#test_rmse = math.sqrt(mean_squared_error(y_test, scaler.inverse_transform(test_predict.reshape(-1, 1))))
+print(f"Train MSE: {train_mse}")
+print(f"Test MSE: {test_mse}")
+history
+
+
+
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+epochs=epochs = range(1, len(val_loss) + 1)
+plt.figure()
+plt.plot(epochs, loss, 'r', label='Training loss')
+plt.plot(epochs, val_loss, 'b', label='Test loss')
+plt.title('Training and test loss')
+plt.title
+plt.legend()
+plt.xlabel('epoch')
+plt.ylabel('loss')
+plt.show()
+
+
+
+
+pre=transformer.predict(test_data[-252:,:].reshape(1, 252, 1))
+forecast_period =252
+scaler1 = MinMaxScaler()
+scaled_data = scaler1.fit_transform(np.array(data['Price'].values.reshape(-1, 1)))
+forecast = scaler1.inverse_transform(np.array(pre).reshape(-1, 1))
+forecast
+forecast=forecast[:]
+vb=scaler.inverse_transform(test_data[-252:,:])[-1][0]
+forecast[0]=vb
+#vb=vb[-1,-1]
+if (forecast[0]/vb)-1>0.05:
+    forecast[0]=vb*(1+0.05)
+if (forecast[0]/vb)-1<-0.05:
+    forecast[0]=vb*(1-0.05)
+for i in range(len(forecast)-1):
+      if (forecast[i+1]/forecast[i])-1>0.05:
+          forecast[i+1]=forecast[i]*(1+0.05)
+for i in range(len(forecast)-1):
+      if (forecast[i+1]/forecast[i])-1<-0.05:
+         forecast[i+1]=forecast[i]*(1-0.05)
+
+
+
+import datetime
+plt.figure(figsize=(10, 6))
+plt.plot(data.index[-len(test_data):], scaler1.inverse_transform(test_data)[:,0], label='Actual')
+plt.plot(pd.date_range(start=data.index[-1]+ datetime.timedelta(days=1), periods=forecast_period, freq='D'),
+forecast, label='Forecast')
+plt.title('USD/NOK Time Series Forecasting (252-day Forecast)')
+plt.xlabel('Year')
+plt.ylabel('Norwegian Krone')
+plt.legend()
+plt.show()
+
+
+import numpy
+import pandas as pd
+ret=pd.DataFrame(forecast)/pd.DataFrame(forecast).shift(1)
+numpy.std(ret)
+pd.DataFrame(forecast).to_excel('/content/drive/MyDrive/forUSA_NOK.xlsx')
+
+
+
+
+
